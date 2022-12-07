@@ -42,10 +42,10 @@ app.post("/addname", (req, res) => {
         });
 });
 
-const Athlete = mongoose.model("User", addressSchema);
+const Addresses = mongoose.model("User", addressSchema);
 
 // find all athletes who play tennis, selecting the 'name' and 'age' fields
-Athlete.find({ auctionAddress: "aman" }, (err, athletes) => {
+Addresses.find({ auctionAddress: "aman" }, (err, athletes) => {
     console.log(athletes);
     if (err) return handleError(err);
     // 'athletes' contains the list of athletes that match the criteria.
