@@ -239,9 +239,13 @@ function App() {
   };
 
   const getData = async () => {
-    console.log("=>");
-    console.log(localStorage.getItem("nft_address"));
-    console.log(localStorage.getItem("auction_address"));
+    try {
+      const response = await fetch('http://localhost:3002/getdata');
+      const data = await response.json();
+      console.log(data);
+    } catch (err) {
+      console.error(err);
+    }
   }
 
   const [data, setdata] = useState({

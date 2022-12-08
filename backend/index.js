@@ -3,8 +3,10 @@ var express = require("express");
 var app = express();
 var port = 3002;
 var bodyParser = require('body-parser');
+const cors = require('cors');
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
+app.use(cors({ origin: 'https://reopen-front.netlify.app' }));
 const mongoose = require("mongoose");
 
 // Set up default mongoose connection
@@ -45,9 +47,14 @@ app.post("/addname", (req, res) => {
 
 const Addresses = mongoose.model("User", addressSchema);
 
-Addresses.find({ auctionAddress: "dabba" }, (err, addresses) => {
-    console.log(addresses);
-    if (err) return handleError(err);
+app.get("/getdata", (req, res) => {
+    Addresses.find({ auctionAddress: "dabba" }, (err, addresses) => {
+        if (err) {
+            res.status(500).send({ error: "Failed to query database" });
+        } else {
+            res.send(addresses);
+        }
+    });
 });
 
 app.listen(port, () => {
