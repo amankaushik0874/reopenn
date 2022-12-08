@@ -21,6 +21,7 @@ db.on("error", console.error.bind(console, "MongoDB connection error:"));
 const Schema = mongoose.Schema;
 
 var addressSchema = new mongoose.Schema({
+    projectOwner: String,
     nftAddress: String,
     auctionAddress: String
 });
@@ -44,11 +45,9 @@ app.post("/addname", (req, res) => {
 
 const Addresses = mongoose.model("User", addressSchema);
 
-// find all athletes who play tennis, selecting the 'name' and 'age' fields
-Addresses.find({ auctionAddress: "aman" }, (err, athletes) => {
-    console.log(athletes);
+Addresses.find({ auctionAddress: "dabba" }, (err, addresses) => {
+    console.log(addresses);
     if (err) return handleError(err);
-    // 'athletes' contains the list of athletes that match the criteria.
 });
 
 app.listen(port, () => {
