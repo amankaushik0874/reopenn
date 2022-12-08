@@ -1,7 +1,7 @@
 // Import the mongoose module
 var express = require("express");
 var app = express();
-var port = 3002;
+var port = "https://reopen-front.netlify.app" || 3002;
 var bodyParser = require('body-parser');
 const cors = require('cors');
 app.use(bodyParser.json());
@@ -31,7 +31,7 @@ var addressSchema = new mongoose.Schema({
 var User = mongoose.model("User", addressSchema);
 
 app.get("/", (req, res) => {
-    res.sendFile(__dirname + "/index.html");
+    res.redirect("https://reopen-front.netlify.app");
 });
 
 app.post("/addname", (req, res) => {
@@ -60,39 +60,3 @@ app.get("/getdata", (req, res) => {
 app.listen(port, () => {
     console.log("Server listening on port " + port);
 });
-// var express = require("express");
-// var app = express();
-// var port = 3002;
-// var bodyParser = require('body-parser');
-// app.use(bodyParser.json());
-// app.use(bodyParser.urlencoded({ extended: true }));
-
-// var mongoose = require("mongoose");
-// mongoose.Promise = global.Promise;
-// mongoose.connect("mongodb+srv://reopen:reopen@cluster0.mkfnkc0.mongodb.net/?retryWrites=true&w=majority");
-
-// var addressSchema = new mongoose.Schema({
-//     nftAddress: String,
-//     auctionAddress: String
-// });
-// var User = mongoose.model("User", addressSchema);
-
-// app.get("/", (req, res) => {
-//     res.sendFile(__dirname + "/index.html");
-// });
-
-// app.post("/addname", (req, res) => {
-//     var myData = new User(req.body);
-//     myData.save()
-//         .then(item => {
-//             res.send("Name saved to database");
-//         })
-//         .catch(err => {
-//             res.status(400).send("Unable to save to database");
-//         });
-// });
-
-
-// app.listen(port, () => {
-//     console.log("Server listening on port " + port);
-// });
