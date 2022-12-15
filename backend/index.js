@@ -2,7 +2,9 @@
 var express = require("express");
 var app = express();
 var port = 3002;
+const cors = require("cors");
 var bodyParser = require('body-parser');
+app.use(cors());
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 const mongoose = require("mongoose");
@@ -42,9 +44,6 @@ app.post("/", (req, res) => {
 
 const Addresses = mongoose.model("User", addressSchema);
 
-// app.get("/", (req, res) => {
-//     res.send("Hello")
-// });
 app.get("/", (req, res) => {
     // Get the searchTerm parameter from the query string
     const searchTerm = req.query.searchTerm;
