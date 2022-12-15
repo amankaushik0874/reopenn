@@ -314,7 +314,7 @@ function App() {
     e.preventDefault();
     const searchTerm = e.target.searchTerm.value;
 
-    fetch(`https://reopenn.vercel.app/?searchTerm=${searchTerm}`)
+    fetch(`https://reopenn.vercel.app/get?searchTerm=${searchTerm}`)
       .then((res) => res.json())
       .then((res) => {
       setResponse(res);
