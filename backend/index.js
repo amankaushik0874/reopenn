@@ -1,16 +1,15 @@
 // Import the mongoose module
 var express = require("express");
 var app = express();
-var port = "https://reopen-front.netlify.app" || 3002;
+var port = 3002;
 var bodyParser = require('body-parser');
-const cors = require('cors');
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
-app.use(cors({ origin: 'https://reopen-front.netlify.app' }));
 const mongoose = require("mongoose");
+mongoose.set('strictQuery', false);
 
 // Set up default mongoose connection
-const mongoDB = "mongodb+srv://reopen:reopen@cluster0.mkfnkc0.mongodb.net/?retryWrites=true&w=majority";
+const mongoDB = "mongodb+srv://reopen:reopen@cluster0.lmekkia.mongodb.net/?retryWrites=true&w=majority";
 mongoose.connect(mongoDB, { useNewUrlParser: true, useUnifiedTopology: true });
 
 // Get the default connection
@@ -30,15 +29,11 @@ var addressSchema = new mongoose.Schema({
 
 var User = mongoose.model("User", addressSchema);
 
-app.get("/", (req, res) => {
-    res.redirect("https://reopen-front.netlify.app");
-});
-
-app.post("/addname", (req, res) => {
+app.post("/", (req, res) => {
     var myData = new User(req.body);
     myData.save()
         .then(item => {
-            res.send("Name saved to database");
+            res.send(item);
         })
         .catch(err => {
             res.status(400).send("Unable to save to database");
@@ -47,8 +42,11 @@ app.post("/addname", (req, res) => {
 
 const Addresses = mongoose.model("User", addressSchema);
 
-app.get("/getdata", (req, res) => {
-    Addresses.find({ auctionAddress: "dabba" }, (err, addresses) => {
+app.get("/", (req, res) => {
+    // Get the searchTerm parameter from the query string
+    const searchTerm = req.query.searchTerm;
+
+    Addresses.findOne({ projectOwner: searchTerm }, (err, addresses) => {
         if (err) {
             res.status(500).send({ error: "Failed to query database" });
         } else {

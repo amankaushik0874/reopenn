@@ -8,7 +8,11 @@ function App() {
   const [loading, setLoading] = useState(false);
   const [nft_address, setNft_address] = useState();
   const [auction_address, setAuction_address] = useState();
+  const [projectOwner_address, setProjectOwner__address] = useState();
   const [inputs, setInputs] = useState({});
+  const [formData, setFormData] = useState({});
+  const [response, setResponse] = useState(null)
+  const [searchTerm, setSearchTerm] = useState()
   const [walletConnected, setWalletConnected] = useState(false);
   const web3ModalRef = useRef();
 
@@ -46,11 +50,8 @@ function App() {
     }
   }, [walletConnected]);
 
-  useEffect(() => {
-    localStorage.setItem('data', "AMAN");
-    localStorage.setItem('data2', "KAUSHIK");
-  });
-  const publish = async () => {
+  const publish = async (e) => {
+    e.preventDefault();
     try {
       console.log("Publish");
       const signer = await getProviderOrSigner(true);
@@ -62,20 +63,24 @@ function App() {
           NFTContract: tokenAddress,
         }
         console.log(JSON.stringify(info));
-        setNft_address(tokenAddress);
+        setNft_address(tokenAddress)
         localStorage.setItem('nft_address', JSON.stringify(tokenAddress));
-        console.log(nft_address);
       });
       factory.on("AuctionCreated", (auctionAddress, event) => {
         let info = {
           auctionContract: auctionAddress,
         }
-
+        
         console.log(JSON.stringify(info));
-        setAuction_address(auctionAddress);
-        localStorage.setItem('auction_address', JSON.stringify(auction_address));
-        console.log(auction_address);
+        setAuction_address(auctionAddress)
+        localStorage.setItem('auction_address', JSON.stringify(auctionAddress));
       });
+      setFormData({
+        projectOwner: inputs.projectWallet_,
+        nftAddress: nft_address,
+        auctionAddress:auction_address
+      })
+      handlePost(e);
       setLoading(true);
       // wait for the transaction to get mined
       await tx.wait();
@@ -284,17 +289,56 @@ function App() {
   }
 
   const handleChange = (event) => {
-    const name = event.target.name;
-    const value = event.target.value;
-    setInputs(values => ({ ...values, [name]: value }))
+    const { name, value } = event.target;
+    setInputs({ ...inputs, [name]: value });
+  }
+
+  const handlePost = async (event) => {
+    event.preventDefault();
+    try {
+      const response = await fetch('https://reopen-backend.netlify.app/', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(formData)
+      });
+      const result = await response.json();
+      return result;
+    } catch (error) {
+      console.error(error);
+  };
+  }
+  
+  const handleData = e => {
+    e.preventDefault();
+    const searchTerm = e.target.searchTerm.value;
+
+    fetch(`https://reopen-backend.netlify.app/?searchTerm=${searchTerm}`)
+      .then((res) => res.json())
+      .then((res) => {
+      setResponse(res);
+      localStorage.setItem('nft_address', JSON.stringify(res.nftAddress));
+      localStorage.setItem('auction_address', JSON.stringify(res.auctionAddress));
+    });
   }
 
   return (
     <div className="App">
       <p>Data {data.address}</p>
       <div className="container">
+      <form onSubmit={handleData}>
+      <input
+        type="text"
+        name="searchTerm"
+        placeholder="WriteProjectId"
+      />
+        <button type="submit">Search</button>
+      </form>
+      </div>
+      <div className="container">
         <button onClick={btnhandler}>Connect</button>
-        <form onSubmit={handleSubmit}>
+        <form onSubmit={publish}>
           <div className="input_container">
             <input type="text" placeholder="operator" onChange={handleChange} name="operator" value={inputs.operator || ""}></input>
             <input type="text" placeholder="projectWallet_" onChange={handleChange} name="projectWallet_" value={inputs.projectWallet_ || ""}></input>
@@ -337,3 +381,5 @@ function App() {
 }
 
 export default App;
+
+
