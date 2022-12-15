@@ -1,0 +1,66 @@
+As mentioned earlier, the server-side code and the frontend code are typically run on different machines or processes, so they cannot directly call each other's functions. Instead, they communicate with each other using a protocol such as HTTP.
+
+To allow the sendData() function on the frontend to call the receiveData() function on the server, you would need to modify the server-side code to listen for incoming HTTP requests and respond by running the receiveData() function. Here is an example of how this could be done:
+
+const express = require('express');
+const app = express();
+
+// Parse incoming request bodies in a middleware before your handlers
+app.use(express.json());
+
+// Declare a variable to store the data received from the frontend
+let data;
+
+// Define a function to receive the data from the frontend
+function receiveData(newData) {
+  data = newData;
+}
+
+// Define a route to receive the data from the frontend
+app.post('/receive-data', (req, res) => {
+  // Call the receiveData() function with the data received from the frontend
+  receiveData(req.body);
+
+  // Send a response to indicate that the data was received successfully
+  res.send('Data received');
+});
+
+// Start the server on port 3000
+app.listen(3000, () => {
+  console.log('Server listening on port 3000');
+});
+
+
+
+
+
+
+
+In this code, the server is running the express library, which allows it to easily handle HTTP requests. The app.use() call is setting up a middleware to parse incoming request bodies as JSON, so that the server can access the data sent by the frontend.
+
+The receiveData() function is defined to store the received data in the data variable. The app.post() route is listening for incoming HTTP requests to the /receive-data route, and responds by calling the receiveData() function with the data from the request.
+
+To call this route from the frontend, you would need to modify the sendData() function to send an HTTP request to the /receive-data route on the server, rather than calling the receiveData() function directly. Here is an example of how this could be done:
+
+
+// Define the function to send data to the server
+function sendData() {
+  // Get the data to send from a form or other input on the page
+  const data = document.getElementById('my-form').value;
+
+  // Send the data to the /receive-data route on the server using fetch()
+  fetch('http://localhost:3000/receive-data', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json'
+    },
+    body: JSON.stringify({ data })
+  })
+    .then(response => response.json())
+    .then(data => {
+      console.log('Data received:', data);
+    })
+    .catch(error => {
+      console.error('Error:', error);
+    });
+}
