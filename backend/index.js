@@ -47,6 +47,7 @@ const Addresses = mongoose.model("User", addressSchema);
 app.get("/", (req, res) => {
     res.send("Hello")
 });
+
 app.get("/get", (req, res) => {
     // Get the searchTerm parameter from the query string
     const searchTerm = req.query.searchTerm;
