@@ -45,17 +45,20 @@ app.post("/", (req, res) => {
 const Addresses = mongoose.model("User", addressSchema);
 
 app.get("/", (req, res) => {
-    // Get the searchTerm parameter from the query string
-    const searchTerm = req.query.searchTerm;
-
-    Addresses.findOne({ projectOwner: searchTerm }, (err, addresses) => {
-        if (err) {
-            res.status(500).send({ error: "Failed to query database" });
-        } else {
-            res.send(addresses);
-        }
-    });
+    res.send("Hello")
 });
+// app.get("/", (req, res) => {
+//     // Get the searchTerm parameter from the query string
+//     const searchTerm = req.query.searchTerm;
+
+//     Addresses.findOne({ projectOwner: searchTerm }, (err, addresses) => {
+//         if (err) {
+//             res.status(500).send({ error: "Failed to query database" });
+//         } else {
+//             res.send(addresses);
+//         }
+//     });
+// });
 
 app.listen(port, () => {
     console.log("Server listening on port " + port);
