@@ -296,7 +296,7 @@ function App() {
   const handlePost = async (event) => {
     event.preventDefault();
     try {
-      const response = await fetch('https://reopen-backend.netlify.app/', {
+      const response = await fetch('https://reopenn.vercel.app/', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json'
@@ -314,7 +314,7 @@ function App() {
     e.preventDefault();
     const searchTerm = e.target.searchTerm.value;
 
-    fetch(`https://reopen-backend.netlify.app/?searchTerm=${searchTerm}`)
+    fetch(`https://reopenn.vercel.app/?searchTerm=${searchTerm}`)
       .then((res) => res.json())
       .then((res) => {
       setResponse(res);
