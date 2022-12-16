@@ -1,18 +1,24 @@
 import "./App.css";
 import React, { useState, useRef, useEffect } from "react";
-import { router_address, factory_address, auction_abi, factory_abi, router_abi, nft_abi } from "./constants";
+import {
+  router_address,
+  factory_address,
+  auction_abi,
+  factory_abi,
+  router_abi,
+  nft_abi,
+} from "./constants";
 import { Contract, providers, utils, ethers, BigNumber } from "ethers";
 import Web3Modal from "web3modal";
 
 function App() {
   const [loading, setLoading] = useState(false);
-  const [nft_address, setNft_address] = useState();
-  const [auction_address, setAuction_address] = useState();
+  const [nft_address, setNft_address] = useState("");
+  const [auction_address, setAuction_address] = useState("");
   const [projectOwner_address, setProjectOwner__address] = useState();
   const [inputs, setInputs] = useState({});
   const [formData, setFormData] = useState({});
-  const [response, setResponse] = useState(null)
-  const [searchTerm, setSearchTerm] = useState()
+  const [response, setResponse] = useState(null);
   const [walletConnected, setWalletConnected] = useState(false);
   const web3ModalRef = useRef();
 
@@ -50,38 +56,77 @@ function App() {
     }
   }, [walletConnected]);
 
+  const eventsData = async () => {
+    const signer = await getProviderOrSigner(true);
+    const factory = new Contract(factory_address, factory_abi, signer);
+    factory.on("NFTCreated", (tokenAddress, event) => {
+      let info = {
+        NFTContract: tokenAddress,
+      };
+      console.log(JSON.stringify(info));
+      localStorage.setItem("nft_address", JSON.stringify(tokenAddress));
+      setNft_address(tokenAddress);
+    });
+    factory.on("AuctionCreated", (auctionAddress, event) => {
+      let info = {
+        auctionContract: auctionAddress,
+      };
+      console.log(JSON.stringify(info));
+      localStorage.setItem("auction_address", JSON.stringify(auctionAddress));
+      setAuction_address(auctionAddress);
+    });
+
+    console.log(nft_address, auction_address);
+    setFormData({
+      ...formData,
+      projectOwner: inputs.projectWallet_,
+      nftAddress: localStorage.getItem("nft_address"),
+      auctionAddress: localStorage.getItem("auction_address"),
+    });
+    console.log("Saved formData");
+
+    console.log(
+      "=>",
+      localStorage.getItem("auction_address"),
+      localStorage.getItem("nft_address")
+    );
+    return (
+      localStorage.getItem("auction_address"),
+      localStorage.getItem("nft_address")
+    );
+  };
+
   const publish = async (e) => {
     e.preventDefault();
     try {
       console.log("Publish");
       const signer = await getProviderOrSigner(true);
       const factory = new Contract(factory_address, factory_abi, signer);
-      const tx = await factory.createNewCampaign(inputs.operator, inputs.projectWallet_, parseInt(inputs.minBidAmount), parseInt(inputs.totalNFTs), BigNumber.from(inputs.AuctionStartTime), BigNumber.from(inputs.AuctionEndTime), parseInt(inputs.Percent));
+      const tx = await factory.createNewCampaign(
+        inputs.operator,
+        inputs.projectWallet_,
+        parseInt(inputs.minBidAmount),
+        parseInt(inputs.totalNFTs),
+        BigNumber.from(inputs.AuctionStartTime),
+        BigNumber.from(inputs.AuctionEndTime),
+        parseInt(inputs.Percent)
+      );
 
-      factory.on("NFTCreated", (tokenAddress, event) => {
-        let info = {
-          NFTContract: tokenAddress,
-        }
-        console.log(JSON.stringify(info));
-        setNft_address(tokenAddress)
-        localStorage.setItem('nft_address', JSON.stringify(tokenAddress));
-      });
-      factory.on("AuctionCreated", (auctionAddress, event) => {
-        let info = {
-          auctionContract: auctionAddress,
-        }
-        
-        console.log(JSON.stringify(info));
-        setAuction_address(auctionAddress)
-        localStorage.setItem('auction_address', JSON.stringify(auctionAddress));
-      });
-      setFormData({
-        projectOwner: inputs.projectWallet_,
-        nftAddress: nft_address,
-        auctionAddress:auction_address
-      })
-      handlePost(e);
-      setLoading(true);
+      setProjectOwner__address(inputs.projectWallet_);
+
+      await eventsData()
+        .then(() => {
+          setFormData({
+            ...formData,
+            projectOwner: projectOwner_address,
+            nftAddress: nft_address,
+            auctionAddress: auction_address,
+          });
+        })
+        .then(() => {
+          console.log(formData);
+          handlePost(e);
+        });
       // wait for the transaction to get mined
       await tx.wait();
       console.log(tx);
@@ -98,7 +143,11 @@ function App() {
       console.log("Placing Bid");
       // We need a Signer here since this is a 'write' transaction.
       const signer = await getProviderOrSigner(true);
-      const auction_contract = new Contract(auction_address, auction_abi, signer);
+      const auction_contract = new Contract(
+        auction_address,
+        auction_abi,
+        signer
+      );
       const tx = await auction_contract.placeBid({ value: inputs.Amount });
 
       setLoading(true);
@@ -120,7 +169,11 @@ function App() {
       const signer = await getProviderOrSigner(true);
       // Create a new instance of the Contract with a Signer, which allows
       // update methods
-      const auction_contract = new Contract(auction_address, auction_abi, signer);
+      const auction_contract = new Contract(
+        auction_address,
+        auction_abi,
+        signer
+      );
       // call the mint from the contract to mint the LW3Punks
       const tx = await auction_contract.selectWinners();
       setLoading(true);
@@ -137,13 +190,19 @@ function App() {
   const approve = async () => {
     try {
       console.log("Approving");
-      const auction_address = JSON.parse(localStorage.getItem("auction_address"));
+      const auction_address = JSON.parse(
+        localStorage.getItem("auction_address")
+      );
       console.log(auction_address);
       // We need a Signer here since this is a 'write' transaction.
       const signer = await getProviderOrSigner(true);
       // Create a new instance of the Contract with a Signer, which allows
       // update methods
-      const auction_contract = new Contract(auction_address, auction_abi, signer);
+      const auction_contract = new Contract(
+        auction_address,
+        auction_abi,
+        signer
+      );
       // call the mint from the contract to mint the LW3Punks
       const tx = await auction_contract.approveAuction();
       setLoading(true);
@@ -159,11 +218,17 @@ function App() {
 
   const increaseBid = async () => {
     try {
-      const auction_address = JSON.parse(localStorage.getItem("auction_address"));
+      const auction_address = JSON.parse(
+        localStorage.getItem("auction_address")
+      );
       console.log("Increasing");
       // We need a Signer here since this is a 'write' transaction.
       const signer = await getProviderOrSigner(true);
-      const auction_contract = new Contract(auction_address, auction_abi, signer);
+      const auction_contract = new Contract(
+        auction_address,
+        auction_abi,
+        signer
+      );
       const tx = await auction_contract.increaseBid({ value: inputs.Amount2 });
 
       setLoading(true);
@@ -179,13 +244,19 @@ function App() {
 
   const claimNFT = async () => {
     try {
-      const auction_address = JSON.parse(localStorage.getItem("auction_address"));
+      const auction_address = JSON.parse(
+        localStorage.getItem("auction_address")
+      );
       console.log("Claiming");
       // We need a Signer here since this is a 'write' transaction.
       const signer = await getProviderOrSigner(true);
       // Create a new instance of the Contract with a Signer, which allows
       // update methods
-      const auction_contract = new Contract(auction_address, auction_abi, signer);
+      const auction_contract = new Contract(
+        auction_address,
+        auction_abi,
+        signer
+      );
       // call the mint from the contract to mint the LW3Punks
       const tx = await auction_contract.claimNFT(inputs.TokenId);
       setLoading(true);
@@ -201,13 +272,19 @@ function App() {
 
   const claimMoney = async () => {
     try {
-      const auction_address = JSON.parse(localStorage.getItem("auction_address"));
+      const auction_address = JSON.parse(
+        localStorage.getItem("auction_address")
+      );
       console.log("Claiming");
       // We need a Signer here since this is a 'write' transaction.
       const signer = await getProviderOrSigner(true);
       // Create a new instance of the Contract with a Signer, which allows
       // update methods
-      const auction_contract = new Contract(auction_address, auction_abi, signer);
+      const auction_contract = new Contract(
+        auction_address,
+        auction_abi,
+        signer
+      );
       // call the mint from the contract to mint the LW3Punks
       const tx = await auction_contract.claimMoney();
       setLoading(true);
@@ -223,15 +300,26 @@ function App() {
 
   const createNewSeason = async () => {
     try {
-      const auction_address = JSON.parse(localStorage.getItem("auction_address"));
+      const auction_address = JSON.parse(
+        localStorage.getItem("auction_address")
+      );
       console.log("Creating New Season");
       // We need a Signer here since this is a 'write' transaction.
       const signer = await getProviderOrSigner(true);
       // Create a new instance of the Contract with a Signer, which allows
       // update methods
-      const auction_contract = new Contract(auction_address, auction_abi, signer);
+      const auction_contract = new Contract(
+        auction_address,
+        auction_abi,
+        signer
+      );
       // call the mint from the contract to mint the LW3Punks
-      const tx = await auction_contract.createNewSeason(parseInt(inputs.minBidAmount2), parseInt(inputs.totalNFTs2), BigNumber.from(inputs.AuctionStartTime2), BigNumber.from(inputs.AuctionEndTime2));
+      const tx = await auction_contract.createNewSeason(
+        parseInt(inputs.minBidAmount2),
+        parseInt(inputs.totalNFTs2),
+        BigNumber.from(inputs.AuctionStartTime2),
+        BigNumber.from(inputs.AuctionEndTime2)
+      );
       setLoading(true);
       // wait for the transaction to get mined
       await tx.wait();
@@ -245,13 +333,13 @@ function App() {
 
   const getData = async () => {
     try {
-      const response = await fetch('http://localhost:3002/getdata');
+      const response = await fetch("http://localhost:3002/");
       const data = await response.json();
       console.log(data);
     } catch (err) {
       console.error(err);
     }
-  }
+  };
 
   const [data, setdata] = useState({
     address: "",
@@ -286,92 +374,176 @@ function App() {
 
   const handleSubmit = (event) => {
     event.preventDefault();
-  }
+  };
 
   const handleChange = (event) => {
     const { name, value } = event.target;
     setInputs({ ...inputs, [name]: value });
-  }
+  };
 
   const handlePost = async (event) => {
     event.preventDefault();
+    console.log(formData);
     try {
-      const response = await fetch('https://reopenn.vercel.app/', {
-        method: 'POST',
+      const response = await fetch("http://localhost:3002/addname", {
+        method: "POST",
         headers: {
-          'Content-Type': 'application/json'
+          "Content-Type": "application/json",
         },
-        body: JSON.stringify(formData)
+        body: JSON.stringify(formData),
       });
       const result = await response.json();
       return result;
     } catch (error) {
       console.error(error);
+    }
   };
-  }
-  
-  const handleData = e => {
+
+  const handleData = (e) => {
     e.preventDefault();
     const searchTerm = e.target.searchTerm.value;
 
-    fetch(`https://reopenn.vercel.app/get?searchTerm=${searchTerm}`)
+    fetch(`http://localhost:3002/getdata?searchTerm=${searchTerm}`)
       .then((res) => res.json())
       .then((res) => {
-      setResponse(res);
-      localStorage.setItem('nft_address', JSON.stringify(res.nftAddress));
-      localStorage.setItem('auction_address', JSON.stringify(res.auctionAddress));
-    });
-  }
+        setResponse(res);
+        localStorage.setItem("nft_address", JSON.stringify(res.nftAddress));
+        localStorage.setItem(
+          "auction_address",
+          JSON.stringify(res.auctionAddress)
+        );
+      });
+  };
 
   return (
     <div className="App">
       <p>Data {data.address}</p>
       <div className="container">
-      <form onSubmit={handleData}>
-      <input
-        type="text"
-        name="searchTerm"
-        placeholder="WriteProjectId"
-      />
-        <button type="submit">Search</button>
-      </form>
+        <form onSubmit={handleData}>
+          <input type="text" name="searchTerm" placeholder="WriteProjectId" />
+          <button type="submit">Search</button>
+        </form>
       </div>
       <div className="container">
         <button onClick={btnhandler}>Connect</button>
         <form onSubmit={publish}>
           <div className="input_container">
-            <input type="text" placeholder="operator" onChange={handleChange} name="operator" value={inputs.operator || ""}></input>
-            <input type="text" placeholder="projectWallet_" onChange={handleChange} name="projectWallet_" value={inputs.projectWallet_ || ""}></input>
-            <input type="number" placeholder="minBidAmount" onChange={handleChange} name="minBidAmount" value={inputs.minBidAmount || ""}></input>
-            <input type="number" placeholder="totalNFTs" onChange={handleChange} name="totalNFTs" value={inputs.totalNFTs || ""}></input>
-            <input type="number" placeholder="AuctionStartTime" onChange={handleChange} name="AuctionStartTime" value={inputs.AuctionStartTime || ""}></input>
-            <input type="number" placeholder="AuctionEndTime" onChange={handleChange} name="AuctionEndTime" value={inputs.AuctionEndTime || ""}></input>
-            <input type="number" placeholder="Percent" onChange={handleChange} name="Percent" value={inputs.Percent || ""}></input>
-            <button onClick={publish} type="submit">Publish</button>
+            <input
+              type="text"
+              placeholder="operator"
+              onChange={handleChange}
+              name="operator"
+              value={inputs.operator || ""}
+            ></input>
+            <input
+              type="text"
+              placeholder="projectWallet_"
+              onChange={handleChange}
+              name="projectWallet_"
+              value={inputs.projectWallet_ || ""}
+            ></input>
+            <input
+              type="number"
+              placeholder="minBidAmount"
+              onChange={handleChange}
+              name="minBidAmount"
+              value={inputs.minBidAmount || ""}
+            ></input>
+            <input
+              type="number"
+              placeholder="totalNFTs"
+              onChange={handleChange}
+              name="totalNFTs"
+              value={inputs.totalNFTs || ""}
+            ></input>
+            <input
+              type="number"
+              placeholder="AuctionStartTime"
+              onChange={handleChange}
+              name="AuctionStartTime"
+              value={inputs.AuctionStartTime || ""}
+            ></input>
+            <input
+              type="number"
+              placeholder="AuctionEndTime"
+              onChange={handleChange}
+              name="AuctionEndTime"
+              value={inputs.AuctionEndTime || ""}
+            ></input>
+            <input
+              type="number"
+              placeholder="Percent"
+              onChange={handleChange}
+              name="Percent"
+              value={inputs.Percent || ""}
+            ></input>
+            <button type="submit">Publish</button>
           </div>
         </form>
         <button onClick={approve}>Approve</button>
         <div className="input_container">
-          <input type="number" placeholder="Amount" onChange={handleChange} name="Amount" value={inputs.Amount || ""}></input>
+          <input
+            type="number"
+            placeholder="Amount"
+            onChange={handleChange}
+            name="Amount"
+            value={inputs.Amount || ""}
+          ></input>
           <button onClick={placeBid}>Place Bid</button>
         </div>
         <div className="input_container">
-          <input type="number" placeholder="Amount" onChange={handleChange} name="Amount2" value={inputs.Amount2 || ""}></input>
+          <input
+            type="number"
+            placeholder="Amount"
+            onChange={handleChange}
+            name="Amount2"
+            value={inputs.Amount2 || ""}
+          ></input>
           <button onClick={increaseBid}>Increase Bid</button>
         </div>
         <button onClick={selectWinners}>selectWinners</button>
         <div className="input_container">
-          <input type="number" placeholder="TokenId" onChange={handleChange} name="TokenId" value={inputs.TokenId || ""}></input>
+          <input
+            type="number"
+            placeholder="TokenId"
+            onChange={handleChange}
+            name="TokenId"
+            value={inputs.TokenId || ""}
+          ></input>
           <button onClick={claimNFT}>ClaimNFT</button>
         </div>
         <button onClick={claimMoney}>Claim Money</button>
         <button onClick={getData}>Snapshot</button>
         <form onSubmit={handleSubmit}>
           <div className="input_container">
-            <input type="number" placeholder="minBidAmount" onChange={handleChange} name="minBidAmount2" value={inputs.minBidAmount2 || ""}></input>
-            <input type="number" placeholder="totalNFTs" onChange={handleChange} name="totalNFTs2" value={inputs.totalNFTs2 || ""}></input>
-            <input type="number" placeholder="AuctionStartTime" onChange={handleChange} name="AuctionStartTime2" value={inputs.AuctionStartTime2 || ""}></input>
-            <input type="number" placeholder="AuctionEndTime" onChange={handleChange} name="AuctionEndTime2" value={inputs.AuctionEndTime2 || ""}></input>
+            <input
+              type="number"
+              placeholder="minBidAmount"
+              onChange={handleChange}
+              name="minBidAmount2"
+              value={inputs.minBidAmount2 || ""}
+            ></input>
+            <input
+              type="number"
+              placeholder="totalNFTs"
+              onChange={handleChange}
+              name="totalNFTs2"
+              value={inputs.totalNFTs2 || ""}
+            ></input>
+            <input
+              type="number"
+              placeholder="AuctionStartTime"
+              onChange={handleChange}
+              name="AuctionStartTime2"
+              value={inputs.AuctionStartTime2 || ""}
+            ></input>
+            <input
+              type="number"
+              placeholder="AuctionEndTime"
+              onChange={handleChange}
+              name="AuctionEndTime2"
+              value={inputs.AuctionEndTime2 || ""}
+            ></input>
             <button onClick={createNewSeason}>New Season</button>
           </div>
         </form>
@@ -381,5 +553,3 @@ function App() {
 }
 
 export default App;
-
-
