@@ -15,7 +15,7 @@ function App() {
   const [loading, setLoading] = useState(false);
   const [nft_address, setNft_address] = useState("");
   const [auction_address, setAuction_address] = useState("");
-  const [projectOwner_address, setProjectOwner__address] = useState();
+  const [projectOwner_address, setProjectOwner_address] = useState();
   const [inputs, setInputs] = useState({});
   const [formData, setFormData] = useState({});
   const [response, setResponse] = useState(null);
@@ -56,45 +56,47 @@ function App() {
     }
   }, [walletConnected]);
 
-  const eventsData = async () => {
-    const signer = await getProviderOrSigner(true);
-    const factory = new Contract(factory_address, factory_abi, signer);
-    factory.on("NFTCreated", (tokenAddress, event) => {
-      let info = {
-        NFTContract: tokenAddress,
-      };
-      console.log(JSON.stringify(info));
-      localStorage.setItem("nft_address", JSON.stringify(tokenAddress));
-      setNft_address(tokenAddress);
-    });
-    factory.on("AuctionCreated", (auctionAddress, event) => {
-      let info = {
-        auctionContract: auctionAddress,
-      };
-      console.log(JSON.stringify(info));
-      localStorage.setItem("auction_address", JSON.stringify(auctionAddress));
-      setAuction_address(auctionAddress);
-    });
-
-    console.log(nft_address, auction_address);
+  const eventsData = async (factory) => {
     setFormData({
       ...formData,
       projectOwner: inputs.projectWallet_,
-      nftAddress: localStorage.getItem("nft_address"),
-      auctionAddress: localStorage.getItem("auction_address"),
     });
-    console.log("Saved formData");
-
-    console.log(
-      "=>",
-      localStorage.getItem("auction_address"),
-      localStorage.getItem("nft_address")
-    );
-    return (
-      localStorage.getItem("auction_address"),
-      localStorage.getItem("nft_address")
-    );
+    factory.on("NFTCreated", (tokenAddress, event) => {
+      console.log(`NFT contract created at address: ${tokenAddress}`);
+      localStorage.setItem("nft_address", tokenAddress);
+      setFormData({
+        ...formData,
+        nftAddress: tokenAddress,
+      });
+    });
+    factory.on("AuctionCreated", (auctionAddress, event) => {
+      console.log(`Auction contract created at address: ${auctionAddress}`);
+      localStorage.setItem("auction_address", auctionAddress);
+      setFormData({
+        ...formData,
+        auctionAddress: auctionAddress,
+      });
+      console.log(formData);
+    });
   };
+  // const eventsData = async (factory) => {
+  //   factory.on("NFTCreated", (tokenAddress, event) => {
+  //     let info = {
+  //       NFTContract: tokenAddress,
+  //     };
+  //     console.log(JSON.stringify(info));
+  //     localStorage.setItem("nft_address", JSON.stringify(tokenAddress));
+  //     setNft_address(tokenAddress);
+  //   });
+  //   factory.on("AuctionCreated", (auctionAddress, event) => {
+  //     let info = {
+  //       auctionContract: auctionAddress,
+  //     };
+  //     console.log(JSON.stringify(info));
+  //     localStorage.setItem("auction_address", JSON.stringify(auctionAddress));
+  //     setAuction_address(auctionAddress);
+  //   });
+  // };
 
   const publish = async (e) => {
     e.preventDefault();
@@ -112,23 +114,23 @@ function App() {
         parseInt(inputs.Percent)
       );
 
-      setProjectOwner__address(inputs.projectWallet_);
-
-      await eventsData()
+      eventsData(factory)
         .then(() => {
-          setFormData({
-            ...formData,
-            projectOwner: projectOwner_address,
-            nftAddress: nft_address,
-            auctionAddress: auction_address,
-          });
-        })
-        .then(() => {
-          console.log(formData);
           handlePost(e);
+          console.log(formData);
+        })
+        .catch((error) => {
+          console.error(error);
         });
-      // wait for the transaction to get mined
       await tx.wait();
+      console.log(
+        "=>",
+        localStorage.getItem("auction_address"),
+        localStorage.getItem("nft_address")
+      );
+      console.log(formData);
+      console.log("Saved formData");
+      // wait for the transaction to get mined
       console.log(tx);
       setLoading(false);
       window.alert("Published");
@@ -383,7 +385,6 @@ function App() {
 
   const handlePost = async (event) => {
     event.preventDefault();
-    console.log(formData);
     try {
       const response = await fetch("http://localhost:3002/addname", {
         method: "POST",
