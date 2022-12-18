@@ -6,10 +6,15 @@
         "use": "@vercel/node"
       }
     ],
-    "routes": [
+    "headers": [
       {
-        "src": "/(.*)",
-        "dest": "/"
+        "source": "*",
+        "headers": [
+          {
+            "key": "Access-Control-Allow-Origin",
+            "value": "https://reopen-front.netlify.app/"
+          }
+        ]
       }
     ]
   }
