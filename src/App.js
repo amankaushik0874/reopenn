@@ -13,14 +13,28 @@ import Web3Modal from "web3modal";
 
 function App() {
   const [loading, setLoading] = useState(false);
-  const [nft_address, setNft_address] = useState("");
-  const [auction_address, setAuction_address] = useState("");
-  const [projectOwner_address, setProjectOwner_address] = useState();
+  const [nftAddress, setNft_address] = useState("");
+  const [auctionAddress, setAuction_address] = useState("");
+  const [projectOwner, setProjectOwner_address] = useState();
   const [inputs, setInputs] = useState({});
   const [formData, setFormData] = useState({});
   const [response, setResponse] = useState(null);
   const [walletConnected, setWalletConnected] = useState(false);
   const web3ModalRef = useRef();
+
+  useEffect(() => {
+    console.log({ formData });
+  }, [formData]);
+
+  useEffect(() => {
+    if (nftAddress && auctionAddress && projectOwner) {
+      handlePost({
+        projectOwner,
+        nftAddress,
+        auctionAddress,
+      });
+    }
+  }, [nftAddress, auctionAddress, projectOwner]);
 
   const getProviderOrSigner = async (needSigner = false) => {
     // Connect to Metamask
@@ -56,26 +70,17 @@ function App() {
     }
   }, [walletConnected]);
 
-  const eventsData = async (factory) => {
-    setFormData({
-      ...formData,
-      projectOwner: inputs.projectWallet_,
-    });
+  const eventsData = async (factory, e) => {
+    setProjectOwner_address(inputs.projectWallet_);
     factory.on("NFTCreated", (tokenAddress, event) => {
       console.log(`NFT contract created at address: ${tokenAddress}`);
       localStorage.setItem("nft_address", tokenAddress);
-      setFormData({
-        ...formData,
-        nftAddress: tokenAddress,
-      });
+      setNft_address(tokenAddress);
     });
     factory.on("AuctionCreated", (auctionAddress, event) => {
       console.log(`Auction contract created at address: ${auctionAddress}`);
       localStorage.setItem("auction_address", auctionAddress);
-      setFormData({
-        ...formData,
-        auctionAddress: auctionAddress,
-      });
+      setAuction_address(auctionAddress);
       console.log(formData);
     });
   };
@@ -114,9 +119,8 @@ function App() {
         parseInt(inputs.Percent)
       );
 
-      eventsData(factory)
+      eventsData(factory, e)
         .then(() => {
-          handlePost(e);
           console.log(formData);
         })
         .catch((error) => {
@@ -383,8 +387,9 @@ function App() {
     setInputs({ ...inputs, [name]: value });
   };
 
-  const handlePost = async (event) => {
-    event.preventDefault();
+  const handlePost = async (formData) => {
+    console.log("=>>>>", formData);
+    // event.preventDefault();
     try {
       const response = await fetch("http://localhost:3002/addname", {
         method: "POST",
