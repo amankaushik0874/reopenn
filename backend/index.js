@@ -6,12 +6,13 @@ const bodyParser = require("body-parser");
 const cors = require("cors");
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
-app.use(cors());
+app.use(cors({ origin: "https://reopen-front.netlify.app/" }));
 const mongoose = require("mongoose");
 mongoose.set("strictQuery", false);
 
 // Set up default mongoose connection
-const mongoDB = "mongodb+srv://reopen:reopen@cluster0.rstrxen.mongodb.net/?retryWrites=true&w=majority";
+const mongoDB =
+  "mongodb+srv://reopen:reopen@cluster0.rstrxen.mongodb.net/?retryWrites=true&w=majority";
 mongoose.connect(mongoDB, { useNewUrlParser: true, useUnifiedTopology: true });
 
 // Get the default connection
@@ -48,11 +49,11 @@ app.get("/getdata", (req, res) => {
   // Get the searchTerm parameter from the query string
   const searchTerm = req.query.searchTerm;
   User.findOne({ projectOwner: searchTerm }, (err, addresses) => {
-      if (err) {
-          res.status(500).send({ error: "Failed to query database" });
-      } else {
-          res.send(addresses);
-      }
+    if (err) {
+      res.status(500).send({ error: "Failed to query database" });
+    } else {
+      res.send(addresses);
+    }
   });
 });
 

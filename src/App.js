@@ -339,7 +339,7 @@ function App() {
 
   const getData = async () => {
     try {
-      const response = await fetch("http://localhost:3002/");
+      const response = await fetch("https://reopenn.vercel.app/");
       const data = await response.json();
       console.log(data);
     } catch (err) {
@@ -391,7 +391,7 @@ function App() {
     console.log("=>>>>", formData);
     // event.preventDefault();
     try {
-      const response = await fetch("http://localhost:3002/addname", {
+      const response = await fetch("https://reopenn.vercel.app/addname", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -409,7 +409,7 @@ function App() {
     e.preventDefault();
     const searchTerm = e.target.searchTerm.value;
 
-    fetch(`http://localhost:3002/getdata?searchTerm=${searchTerm}`)
+    fetch(`https://reopenn.vercel.app/getdata?searchTerm=${searchTerm}`)
       .then((res) => res.json())
       .then((res) => {
         setResponse(res);
