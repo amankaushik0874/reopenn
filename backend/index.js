@@ -1,12 +1,13 @@
-// Import the mongoose module
 const express = require("express");
 const app = express();
-const port = 3002;
 const bodyParser = require("body-parser");
 const cors = require("cors");
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
+
+// Enable CORS for the https://reopen-front.netlify.app/ domain
 app.use(cors({ origin: "https://reopen-front.netlify.app/" }));
+
 const mongoose = require("mongoose");
 mongoose.set("strictQuery", false);
 
@@ -57,6 +58,7 @@ app.get("/getdata", (req, res) => {
   });
 });
 
+const port = "https://reopenn.vercel.app" || 3002;
 app.listen(port, () => {
   console.log("Server listening on port " + port);
 });
