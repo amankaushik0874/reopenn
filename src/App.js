@@ -394,6 +394,7 @@ function App() {
       const response = await fetch("https://reopenn.vercel.app/addname", {
         method: "POST",
         headers: {
+          Origin: "https://reopen-front.netlify.app",
           "Content-Type": "application/json",
         },
         body: JSON.stringify(formData),
