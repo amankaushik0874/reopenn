@@ -145,7 +145,9 @@ function App() {
 
   const placeBid = async () => {
     try {
-      const auction_address = localStorage.getItem("auction_address");
+      const auction_address = JSON.parse(
+        localStorage.getItem("auction_address")
+      );
       console.log("Placing Bid");
       // We need a Signer here since this is a 'write' transaction.
       const signer = await getProviderOrSigner(true);
@@ -169,7 +171,9 @@ function App() {
 
   const selectWinners = async () => {
     try {
-      const auction_address = localStorage.getItem("auction_address");
+      const auction_address = JSON.parse(
+        localStorage.getItem("auction_address")
+      );
       console.log("Selecting");
       // We need a Signer here since this is a 'write' transaction.
       const signer = await getProviderOrSigner(true);
