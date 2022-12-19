@@ -8,15 +8,6 @@ app.use(bodyParser.urlencoded({ extended: true }));
 // Enable CORS for the https://reopen-front.netlify.app/ domain
 app.use(cors({ origin: "https://reopen-front.netlify.app/" }));
 
-app.use(function (req, res, next) {
-  res.header("Access-Control-Allow-Origin", "*");
-  res.header(
-    "Access-Control-Allow-Headers",
-    "Origin, X-Requested-With, Content-Type, Accept"
-  );
-  next();
-});
-
 const mongoose = require("mongoose");
 mongoose.set("strictQuery", false);
 
