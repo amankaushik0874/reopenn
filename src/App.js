@@ -7,6 +7,8 @@ import {
   factory_abi,
   router_abi,
   nft_abi,
+  holderYield_abi,
+  holderYield_address,
 } from "./constants";
 import { Contract, providers, utils, ethers, BigNumber } from "ethers";
 import Web3Modal from "web3modal";
@@ -84,24 +86,6 @@ function App() {
       console.log(formData);
     });
   };
-  // const eventsData = async (factory) => {
-  //   factory.on("NFTCreated", (tokenAddress, event) => {
-  //     let info = {
-  //       NFTContract: tokenAddress,
-  //     };
-  //     console.log(JSON.stringify(info));
-  //     localStorage.setItem("nft_address", JSON.stringify(tokenAddress));
-  //     setNft_address(tokenAddress);
-  //   });
-  //   factory.on("AuctionCreated", (auctionAddress, event) => {
-  //     let info = {
-  //       auctionContract: auctionAddress,
-  //     };
-  //     console.log(JSON.stringify(info));
-  //     localStorage.setItem("auction_address", JSON.stringify(auctionAddress));
-  //     setAuction_address(auctionAddress);
-  //   });
-  // };
 
   const publish = async (e) => {
     e.preventDefault();
@@ -164,6 +148,84 @@ function App() {
       console.log(tx);
       setLoading(false);
       window.alert("Bid Placed");
+    } catch (err) {
+      console.error(err);
+    }
+  };
+  const stakeNFT = async () => {
+    try {
+      const nft_address = JSON.parse(localStorage.getItem("auction_address"));
+      console.log("Staking");
+      // We need a Signer here since this is a 'write' transaction.
+      const signer = await getProviderOrSigner(true);
+      const holderYield_contract = new Contract(
+        holderYield_address,
+        holderYield_abi,
+        signer
+      );
+      const tx = await holderYield_contract.stake(
+        nft_address,
+        inputs.tokenForStake
+      );
+
+      setLoading(true);
+      // wait for the transaction to get mined
+      await tx.wait();
+      console.log(tx);
+      setLoading(false);
+      window.alert("Congratulations!, your NFT is Staked");
+    } catch (err) {
+      console.error(err);
+    }
+  };
+  const unstakeNFT = async () => {
+    try {
+      const nft_address = JSON.parse(localStorage.getItem("auction_address"));
+      console.log("Unstaking");
+      // We need a Signer here since this is a 'write' transaction.
+      const signer = await getProviderOrSigner(true);
+      const holderYield_contract = new Contract(
+        holderYield_address,
+        holderYield_abi,
+        signer
+      );
+      const tx = await holderYield_contract.unstake(
+        nft_address,
+        inputs.tokenForUnstake
+      );
+
+      setLoading(true);
+      // wait for the transaction to get mined
+      await tx.wait();
+      console.log(tx);
+      setLoading(false);
+      window.alert("Unstaked!");
+    } catch (err) {
+      console.error(err);
+    }
+  };
+  const claimRewards = async () => {
+    try {
+      const nft_address = JSON.parse(localStorage.getItem("auction_address"));
+      console.log("Claiming");
+      // We need a Signer here since this is a 'write' transaction.
+      const signer = await getProviderOrSigner(true);
+      const holderYield_contract = new Contract(
+        holderYield_address,
+        holderYield_abi,
+        signer
+      );
+      const tx = await holderYield_contract.claim(
+        nft_address,
+        inputs.TokenForRewards
+      );
+
+      setLoading(true);
+      // wait for the transaction to get mined
+      await tx.wait();
+      console.log(tx);
+      setLoading(false);
+      window.alert("Reward Claimed!");
     } catch (err) {
       console.error(err);
     }
@@ -558,6 +620,36 @@ function App() {
             <button onClick={createNewSeason}>New Season</button>
           </div>
         </form>
+        <div className="input_container">
+          <input
+            type="number"
+            placeholder="TokenId"
+            onChange={handleChange}
+            name="tokenForStake"
+            value={inputs.tokenForStake || ""}
+          ></input>
+          <button onClick={stakeNFT}>Stake</button>
+        </div>
+        <div className="input_container">
+          <input
+            type="number"
+            placeholder="TokenId"
+            onChange={handleChange}
+            name="tokenForUnstake"
+            value={inputs.tokenForUnstake || ""}
+          ></input>
+          <button onClick={unstakeNFT}>Unstake</button>
+        </div>
+        <div className="input_container">
+          <input
+            type="number"
+            placeholder="TokenId"
+            onChange={handleChange}
+            name="TokenForRewards"
+            value={inputs.TokenForRewards || ""}
+          ></input>
+          <button onClick={claimRewards}>Claim Rewards</button>
+        </div>
       </div>
     </div>
   );
