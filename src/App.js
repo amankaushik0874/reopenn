@@ -246,7 +246,7 @@ function App() {
         auction_abi,
         signer
       );
-      // call the mint from the contract to mint the LW3Punks
+
       const tx = await auction_contract.selectWinners();
       setLoading(true);
       // wait for the transaction to get mined
@@ -275,7 +275,7 @@ function App() {
         auction_abi,
         signer
       );
-      // call the mint from the contract to mint the LW3Punks
+
       const tx = await auction_contract.approveAuction();
       setLoading(true);
       // wait for the transaction to get mined
@@ -329,7 +329,7 @@ function App() {
         auction_abi,
         signer
       );
-      // call the mint from the contract to mint the LW3Punks
+
       const tx = await auction_contract.claimNFT(inputs.TokenId);
       setLoading(true);
       // wait for the transaction to get mined
@@ -357,7 +357,7 @@ function App() {
         auction_abi,
         signer
       );
-      // call the mint from the contract to mint the LW3Punks
+
       const tx = await auction_contract.claimMoney();
       setLoading(true);
       // wait for the transaction to get mined
@@ -385,7 +385,7 @@ function App() {
         auction_abi,
         signer
       );
-      // call the mint from the contract to mint the LW3Punks
+
       const tx = await auction_contract.createNewSeason(
         parseInt(inputs.minBidAmount2),
         parseInt(inputs.totalNFTs2),
