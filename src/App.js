@@ -28,15 +28,15 @@ function App() {
     console.log({ formData });
   }, [formData]);
 
-  useEffect(() => {
-    if (nftAddress && auctionAddress && projectOwner) {
-      handlePost({
-        projectOwner,
-        nftAddress,
-        auctionAddress,
-      });
-    }
-  }, [nftAddress, auctionAddress, projectOwner]);
+  // useEffect(() => {
+  //   if (nftAddress && auctionAddress && projectOwner) {
+  //     handlePost({
+  //       projectOwner,
+  //       nftAddress,
+  //       auctionAddress,
+  //     });
+  //   }
+  // }, [nftAddress, auctionAddress, projectOwner]);
 
   const getProviderOrSigner = async (needSigner = false) => {
     // Connect to Metamask
@@ -93,6 +93,7 @@ function App() {
       console.log("Publish");
       const signer = await getProviderOrSigner(true);
       const factory = new Contract(factory_address, factory_abi, signer);
+      handlePost(factory);
       const tx = await factory.createNewCampaign(
         inputs.operator,
         inputs.projectWallet_,
@@ -405,7 +406,7 @@ function App() {
 
   const getData = async () => {
     try {
-      const response = await fetch("https://reopenn.vercel.app/");
+      const response = await fetch("https://localhost:3002/");
       const data = await response.json();
       console.log(data);
     } catch (err) {
@@ -453,17 +454,24 @@ function App() {
     setInputs({ ...inputs, [name]: value });
   };
 
-  const handlePost = async (formData) => {
+  const handlePost = async (formData, factory) => {
     console.log("=>>>>", formData);
     // event.preventDefault();
     try {
-      const response = await fetch("https://reopenn.vercel.app/addname", {
+      //   const response = await fetch("https://localhost:3002/addname", {
+      //     method: "POST",
+      //     headers: {
+      //       Origin: "http://localhost:3000",
+      //       "Content-Type": "application/json",
+      //     },
+      //     body: JSON.stringify(formData),
+      //   });
+      fetch("http://localhost:3002/registerfactory", {
         method: "POST",
         headers: {
-          Origin: "https://reopen-front.netlify.app",
           "Content-Type": "application/json",
         },
-        body: JSON.stringify(formData),
+        body: JSON.stringify(factory),
       });
       const result = await response.json();
       return result;
@@ -476,7 +484,7 @@ function App() {
     e.preventDefault();
     const searchTerm = e.target.searchTerm.value;
 
-    fetch(`https://reopenn.vercel.app/getdata?searchTerm=${searchTerm}`)
+    fetch(`https://localhost:3002/getdata?searchTerm=${searchTerm}`)
       .then((res) => res.json())
       .then((res) => {
         setResponse(res);

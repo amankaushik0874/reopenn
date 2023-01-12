@@ -2,11 +2,14 @@ const express = require("express");
 const app = express();
 const bodyParser = require("body-parser");
 const cors = require("cors");
+const { factory_address, factory_abi } = require("./constants/index");
+const Ether = require("ethers");
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 
 // Enable CORS for the https://reopen-front.netlify.app/ domain
-app.use(cors({ origin: "https://reopen-front.netlify.app" }));
+// app.use(cors({ origin: "https://reopen-front.netlify.app" }));
+app.use(cors({ origin: "http://localhost:3000" }));
 
 const mongoose = require("mongoose");
 mongoose.set("strictQuery", false);
@@ -58,7 +61,31 @@ app.get("/getdata", (req, res) => {
   });
 });
 
-const port = "https://reopenn.vercel.app" || 3002;
+app.post("/registerfactory", (req, res) => {
+  console.log(factory_address);
+  // Connect to the Ethereum network
+  const provider = new Ether.providers.JsonRpcProvider(
+    "https://rpc-mumbai.maticvigil.com"
+  );
+
+  // Create a contract instance
+  const factory = new Ether.Contract(factory_address, factory_abi, provider);
+  console.log("running...");
+  // Listen for the "NFTCreated" event
+  factory.on("NFTCreated", (tokenAddress, event) => {
+    console.log(`NFT contract created at address: ${tokenAddress}`);
+    // Save the NFT address to the database
+  });
+
+  // Listen for the "AuctionCreated" event
+  factory.on("AuctionCreated", (auctionAddress, event) => {
+    console.log(`Auction contract created at address: ${auctionAddress}`);
+    // Save the auction address to the database
+  });
+});
+
+// const port = "https://reopenn.vercel.app" || 3002;
+const port = 3002;
 app.listen(port, () => {
   console.log("Server listening on port " + port);
 });
