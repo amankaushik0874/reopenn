@@ -62,7 +62,6 @@ app.get("/getdata", (req, res) => {
 });
 
 app.post("/registerfactory", (req, res) => {
-  console.log(factory_address);
   // Connect to the Ethereum network
   const provider = new Ether.providers.JsonRpcProvider(
     "https://rpc-mumbai.maticvigil.com"
@@ -72,13 +71,13 @@ app.post("/registerfactory", (req, res) => {
   const factory = new Ether.Contract(factory_address, factory_abi, provider);
   console.log("running...");
   // Listen for the "NFTCreated" event
-  factory.on("NFTCreated", (tokenAddress, event) => {
+  factory.once("NFTCreated", (tokenAddress, event) => {
     console.log(`NFT contract created at address: ${tokenAddress}`);
     // Save the NFT address to the database
   });
 
   // Listen for the "AuctionCreated" event
-  factory.on("AuctionCreated", (auctionAddress, event) => {
+  factory.once("AuctionCreated", (auctionAddress, event) => {
     console.log(`Auction contract created at address: ${auctionAddress}`);
     // Save the auction address to the database
   });
