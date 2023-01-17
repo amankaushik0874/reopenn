@@ -79,12 +79,6 @@ function App() {
       localStorage.setItem("nft_address", tokenAddress);
       setNft_address(tokenAddress);
     });
-    factory.on("AuctionCreated", (auctionAddress, event) => {
-      console.log(`Auction contract created at address: ${auctionAddress}`);
-      localStorage.setItem("auction_address", auctionAddress);
-      setAuction_address(auctionAddress);
-      console.log(formData);
-    });
   };
 
   const publish = async (e) => {
@@ -99,6 +93,7 @@ function App() {
         inputs.projectWallet_,
         parseInt(inputs.minBidAmount),
         parseInt(inputs.totalNFTs),
+        inputs.CampaignId,
         BigNumber.from(inputs.AuctionStartTime),
         BigNumber.from(inputs.AuctionEndTime),
         parseInt(inputs.Percent)
@@ -557,6 +552,13 @@ function App() {
               onChange={handleChange}
               name="Percent"
               value={inputs.Percent || ""}
+            ></input>
+            <input
+              type="number"
+              placeholder="CampaignId"
+              onChange={handleChange}
+              name="CampaignId"
+              value={inputs.CampaignId || ""}
             ></input>
             <button type="submit">Publish</button>
           </div>

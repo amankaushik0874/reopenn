@@ -71,16 +71,15 @@ app.post("/registerfactory", (req, res) => {
   const factory = new Ether.Contract(factory_address, factory_abi, provider);
   console.log("running...");
   // Listen for the "NFTCreated" event
-  factory.once("NFTCreated", (tokenAddress, event) => {
-    console.log(`NFT contract created at address: ${tokenAddress}`);
-    // Save the NFT address to the database
-  });
-
-  // Listen for the "AuctionCreated" event
-  factory.once("AuctionCreated", (auctionAddress, event) => {
-    console.log(`Auction contract created at address: ${auctionAddress}`);
-    // Save the auction address to the database
-  });
+  factory.once(
+    "contractsCreated",
+    (NFTContract, auctionContract, campaignID_, event) => {
+      console.log(`NFT contract created at address: ${NFTContract}`);
+      console.log(`Auction contract created at address: ${auctionContract}`);
+      console.log(`Id contract created at address: ${campaignID_}`);
+      // Save the NFT address to the database
+    }
+  );
 });
 
 // const port = "https://reopenn.vercel.app" || 3002;

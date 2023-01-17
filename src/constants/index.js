@@ -96,6 +96,19 @@ export const auction_abi = [
     type: "event",
   },
   {
+    inputs: [],
+    name: "GenesisPassContract",
+    outputs: [
+      {
+        internalType: "contract GenesisPass",
+        name: "",
+        type: "address",
+      },
+    ],
+    stateMutability: "view",
+    type: "function",
+  },
+  {
     inputs: [
       {
         internalType: "uint256",
@@ -235,6 +248,24 @@ export const auction_abi = [
       },
     ],
     stateMutability: "view",
+    type: "function",
+  },
+  {
+    inputs: [
+      {
+        internalType: "uint256",
+        name: "bidNumber_",
+        type: "uint256",
+      },
+      {
+        internalType: "address",
+        name: "bidderAddress_",
+        type: "address",
+      },
+    ],
+    name: "cancelBid",
+    outputs: [],
+    stateMutability: "payable",
     type: "function",
   },
   {
@@ -638,11 +669,23 @@ export const factory_abi = [
       {
         indexed: false,
         internalType: "address",
+        name: "tokenAddress",
+        type: "address",
+      },
+      {
+        indexed: false,
+        internalType: "address",
         name: "auctionAddress",
         type: "address",
       },
+      {
+        indexed: false,
+        internalType: "uint256",
+        name: "campaignID",
+        type: "uint256",
+      },
     ],
-    name: "AuctionCreated",
+    name: "contractsCreated",
     type: "event",
   },
   {
@@ -665,6 +708,11 @@ export const factory_abi = [
       {
         internalType: "uint256",
         name: "totalNFTs",
+        type: "uint256",
+      },
+      {
+        internalType: "uint256",
+        name: "campaignID_",
         type: "uint256",
       },
       {
@@ -695,22 +743,14 @@ export const factory_abi = [
         name: "",
         type: "address",
       },
+      {
+        internalType: "uint256",
+        name: "",
+        type: "uint256",
+      },
     ],
     stateMutability: "nonpayable",
     type: "function",
-  },
-  {
-    anonymous: false,
-    inputs: [
-      {
-        indexed: false,
-        internalType: "address",
-        name: "tokenAddress",
-        type: "address",
-      },
-    ],
-    name: "NFTCreated",
-    type: "event",
   },
   {
     inputs: [],
@@ -927,13 +967,6 @@ export const nft_abi = [
     ],
     name: "Transfer",
     type: "event",
-  },
-  {
-    inputs: [],
-    name: "_payTxFee",
-    outputs: [],
-    stateMutability: "nonpayable",
-    type: "function",
   },
   {
     inputs: [
@@ -1373,13 +1406,6 @@ export const nft_abi = [
       },
     ],
     name: "unlock",
-    outputs: [],
-    stateMutability: "nonpayable",
-    type: "function",
-  },
-  {
-    inputs: [],
-    name: "withdraw",
     outputs: [],
     stateMutability: "nonpayable",
     type: "function",
@@ -1965,4 +1991,4 @@ export const holderYield_abi = [
 ];
 export const holderYield_address = "0x721CE71Fd08CAB3791128A310Af29F2bb9B3Bf93";
 export const router_address = "0x7f8A1Ae9BE7F1B133C40342A7B7Dd49f981A340F";
-export const factory_address = "0xd241A1DF2aD9A66ba62D29211a9ffB62a83F45A5";
+export const factory_address = "0x951736A1da3d72190c6C731031A9be2bc447376b";
